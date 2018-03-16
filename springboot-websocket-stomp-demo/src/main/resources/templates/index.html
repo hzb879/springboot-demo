@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.bootcss.com/stomp.js/2.3.3/stomp.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery/2.2.4/jquery.js"></script>
+</head>
+<body>
+	<h1>websocket_stomp测试页....</h1>
+	<p>
+		<label>消息内容:</label> <input type="text" id="msg-user-content">
+	 	<label>用户名称:</label> <input type="text" id="msg-username">
+	 	<button id="submit-msg-user">发送消息给特定用户</button>
+	</p>
+	<p><label>消息内容:</label> <input type="text" id="msg-content"> <button id="submit-msg">发送消息给订阅者</button></p>
+	<p>收到的订阅普通消息:</p> 
+	<div id="message">
+	
+	</div>
+	<p style="color: red;">收到的个人专属消息:</p> 
+	<div id="message-personal">
+		
+	</div>
+	<script type="text/javascript">
+		$(function(){
+			var socket = new SockJS("http://localhost:8088/web_socket");
+			var stompClient = Stomp.over(socket);
+
+			stompClient.connect({}, function(frame) {
+				//普通消息订阅
+				stompClient.subscribe('/topic/common', function(message){
+					if (message.body) {
+					     $('#message').append('<p style="color: green;">' + message.body + '</p>');
+					} else {
+					      alert("got empty message");
+					}
+				})
+				//个人专属消息订阅
+				stompClient.subscribe('/user/queue/my_msg', function(message){
+					if (message.body) {
+					     $('#message-personal').append('<p style="color: blue;">' + message.body + '</p>');
+					} else {
+					      alert("got empty message");
+					}
+				})
+				
+				//发送消息给订阅者
+				$('#submit-msg').on('click', function(){
+					stompClient.send("/app/common", {}, $("#msg-content").val());
+				})	
+				
+				//发送消息给特定用户
+				$("#submit-msg-user").on('click', function(){
+					stompClient.send("/app/talk", {}, JSON.stringify({
+						toUser:  $("#msg-username").val(),
+						data:  $("#msg-user-content").val()
+					}));
+				})
+				
+			});
+			
+			
+			
+			
+			
+			
+		});
+	
+	</script>
+</body>
+</html>

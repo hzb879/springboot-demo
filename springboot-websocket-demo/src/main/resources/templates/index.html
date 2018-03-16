@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<h1>原生websocket测试</h1>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script type="text/javascript">
+	// Create WebSocket connection.
+	//  new WebSocket('ws://localhost:8080/web_socket');
+	const socket = new SockJS('http://localhost:8080/web_socket');
+	
+	// Connection opened
+	socket.addEventListener('open', function (event) {
+		console.log('连接成功');
+	    socket.send('Hello Server!');
+	});
+	
+	var i = 0;
+	
+	// Listen for messages
+	socket.addEventListener('message', function (event) {
+	    console.log('Receive message from server', event.data);
+	    setTimeout(function(){
+	    		socket.send('发送消息给服务器' + (i++));	
+	    },2000);
+	});
+
+</script>
+</html>
